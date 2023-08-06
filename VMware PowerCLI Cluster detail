@@ -1,0 +1,77 @@
+# please note that you will need the VMware Powershell plugins and a copy of Excel on the machine running the code.
+# MS Excel should be installed
+# It will show cluster details
+#Cluster Name
+#DRS Status
+#Drs Automation Level
+#HA Status
+#HA Failover Level
+#HA Restart Priority
+#Swap File Location
+#Cluster Report
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $False
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “Cluster Name”
+$Sheet.Cells.Item(1,2) = “DRS Status”
+$Sheet.Cells.Item(1,3) = “Drs Automation Level”
+$Sheet.Cells.Item(1,4) = “HA Status”
+$Sheet.Cells.Item(1,5) = “HA Failover Level”
+$Sheet.Cells.Item(1,6) = “HA Restart Priority”
+$Sheet.Cells.Item(1,7) = “Swap File Location”
+
+
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+
+$intRow = 2
+
+$colItems=Get-Cluster
+foreach ($objItem in $colItems)
+{
+$Name1=$objItem.Name
+$DrsEnabled1=$objItem.DrsEnabled
+$DrsAutomationLevel1=$objItem.DrsAutomationLevel.tostring()
+$HAEnabled1=$objItem.HAEnabled
+$HAFailoverLevel1=$objItem.HAFailoverLevel
+$HARestartPriority1=$objItem.HARestartPriority.tostring()
+$VMSwapfilePolicy1=$objItem.VMSwapfilePolicy.tostring()
+$Sheet.Cells.Item($intRow,1) = $Name1
+$Sheet.Cells.Item($intRow,2) = $DrsEnabled1
+$Sheet.Cells.Item($intRow,3) = $DrsAutomationLevel1
+$Sheet.Cells.Item($intRow,4) = $HAEnabled1
+$Sheet.Cells.Item($intRow,5) = $HAFailoverLevel1
+$Sheet.Cells.Item($intRow,6) = $HARestartPriority1
+$Sheet.Cells.Item($intRow,7) = $VMSwapfilePolicy1
+$intRow = $intRow + 1
+
+}
+
+$WorkBook.EntireColumn.AutoFit()
+
+$dt=get-date
+
+$day=$dt.Day.ToString()
+$hour=$dt.Hour.ToString()
+$min=$dt.Minute.ToString()
+$month=$dt.Month.ToString()
+$sec=$dt.Second.ToString()
+$yr=$dt.Year.ToString()
+$filename="Cluster_Report_"+$day+"_"+$month+"_"+$yr+"_"+$hour+"_"+$min+"_"+$sec
+
+$filepath="C:\jockey\"+$filename+".xlsx"
+
+echo $filepath
+echo "1"
+
+$Excel.SaveAs($filepath)
+$excel.Close()
