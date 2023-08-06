@@ -1,0 +1,32 @@
+Think of a situation when your vm is down , you tried to search it in vCenter but didn't find it.
+you have multiple datastore more than 200 luns and now your task is to find the vm
+Manual method is to check each datastore one by one but that is time consuming activity
+Below script will let you search the from multiple luns
+
+
+
+$dstore=Get-Datastore #this command will pull the list of lun from vCenter
+clear
+foreach($dss in $dstore) #adding for loop will perform below activity for all the luns
+{
+write-host $dss.Name # writing names for output
+
+$vm=Get-ChildItem -Path vmstore:\"DStr1"\$dss |select name #getting list of folders which are there in the datastore , DStr1 is the datacenter name which you need to hardcore here and inside the datacenter $dss is the lun
+
+    foreach($fol in $vm)# perform below activity for each vm folder
+    {
+    write-host $fol.Name
+    $file=$fol.Name
+
+    Get-ChildItem  -Path vmstore:\"DStr1"\$dss\$file|Select-String -Pattern "vm_name" #this will print the file name and so called vm name you can get as output
+  
+    }
+}
+
+
+
+There is another method to search it, if you have an environment where at least one esxi host is there who can see all the luns presented to the vc then you can just take a putty session and use below command to get the details, it will show you the lun id and the file name
+
+
+
+find /vmfs/volumes -name servername.vmx
