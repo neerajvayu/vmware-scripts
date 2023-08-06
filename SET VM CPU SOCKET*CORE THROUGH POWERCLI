@@ -1,0 +1,23 @@
+Think of the scenario where vm is running with hardware version 10, edit option is grayed out in VC 5.5.
+The only way to do it was from web client and that was also not opening due to some issue.
+I have written a Powershell script and performed this activity without any issue.
+Script :
+#================
+get-vm -name vmname1
+
+stop-vmguest -VM vmname1-Confirm:$false
+
+set-vm -vm vmname1-MemoryGB 32
+
+    $proccount = 10
+
+    $corecount = 1
+
+    
+    $spec = new-object -typename VMware.VIM.virtualmachineconfigspec -property @{'numcorespersocket'=$corecount;'numCPUs'=$proccount}
+
+    (Get-VM –Name vmname1).ExtensionData.ReconfigVM_Task($spec)
+start-vm -VM vmname1-Confirm:$false
+
+
+#=================
