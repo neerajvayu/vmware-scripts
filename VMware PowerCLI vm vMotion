@@ -1,0 +1,21 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+$a = Get-Date
+echo $a.Hour
+
+if($a.Hour -ge 15)
+{
+
+    $vms=get-folder -name fol1 |Get-VM
+    foreach($item in $vms)
+    {
+
+
+        Get-VM -Name $item.name | Move-VM –Destination (Get-VMHost jockeyhost1)
+
+    }
+}
