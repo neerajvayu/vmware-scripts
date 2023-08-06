@@ -1,0 +1,22 @@
+$dstore=Get-Datastore
+clear
+foreach($dss in $dstore)
+{
+write-host $dss.Name
+
+
+$vm=Get-ChildItem -Path vmstore:\"UK Datacenter"\$dss |select name
+
+    foreach($fol in $vm)
+    {
+    write-host $fol.Name
+    $file=$fol.Name
+
+
+
+    Get-ChildItem  -Path vmstore:\"UK Datacenter"\$dss\$file|Select-String -Pattern "vmsn"
+    Get-ChildItem  -Path vmstore:\"UK Datacenter"\$dss\$file|Select-String -Pattern "delta"
+    Get-ChildItem  -Path vmstore:\"UK Datacenter"\$dss\$file|Select-String -Pattern "ctk"
+
+    }
+}
