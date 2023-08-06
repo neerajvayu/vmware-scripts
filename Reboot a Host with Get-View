@@ -1,0 +1,10 @@
+You can reboot a host by using its corresponding view object.
+Prerequisites
+Verify that you are connected to a vCenter Server system.
+Procedure
+1
+Use the Get-VMHost cmdlet to get a host by its name, and pass the result to the Get-View cmdlet to get the corresponding view object.
+$vmhostView = Get-VMHost -Name Host | Get-View 
+2
+Call the reboot method of the host view object to reboot the host.
+$vmhostView.RebootHost()
