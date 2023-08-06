@@ -1,0 +1,25 @@
+With vSphere PowerCLI, you can automate various administration tasks on virtual machines, for example retrieving information, shutting down and powering off virtual machines.
+Procedure
+ 
+1
+View all virtual machines on the target system.
+Get-VM
+2
+Save the name and the power state properties of the virtual machines in the ResourcePool resource pool into a file named myVMProperties.txt.
+$respool = Get-ResourcePool ResourcePool
+Get-VM -Location $respool | Select-Object Name, PowerState > myVMProperties.txt
+3
+Start the VM virtual machine.
+Get-VM VM | Start-VM
+4
+Get information of the guest OS of the VM virtual machine.
+Get-VMGuest VM | fc
+5
+Shut down the OS of the VM virtual machine.
+Shutdown-VMGuest VM
+6
+Power off the VM virtual machine.
+Stop-VM VM
+7
+Move the virtual machine VM from the Host01 host to the Host02 host.
+Get-VM -Name VM -Location Host01 | Move-VM –Destination Host02
