@@ -1,0 +1,24 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+$vmlist = get-vm
+
+foreach ($vmm in $vmlist)
+    {
+    $item=get-vm $vmm |select NumCpu,MemoryMB
+    $cpulimit=$item.NumCpu*2000
+    $ramlimit=$item.MemoryMB+100
+    get-VMResourceConfiguration -VM $vmm |Set-VMResourceConfiguration -CPULimitMhz $cpulimit -MemLimitMB $ramlimit
+ 
+ 
+    $disk = Get-HardDisk -VM $vmm | where {$_.Name -ne "Hard Disk" }
+    get-VMResourceConfiguration -VM $vmm | Set-VMResourceConfiguration -Disk $disk -DiskLimitIOPerSecond 38
+
+    write-host $cpulimit
+    Write-Host $ramlimit
+
+ 
+    }
