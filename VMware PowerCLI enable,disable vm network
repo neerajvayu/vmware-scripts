@@ -1,0 +1,13 @@
+$vmm=get-vm -name tech-jockey-vm1 |select name
+
+foreach($vmn in $vmm)
+{
+#to disable the NIC
+Get-VM -Name $vmn.name | Get-NetworkAdapter | Set-NetworkAdapter -Connected:$false -confirm:$false
+}
+
+
+
+
+# to enable NIC
+#Get-VM -Name $vmn.name | Get-NetworkAdapter | Set-NetworkAdapter -Connected:$true -confirm:$false
