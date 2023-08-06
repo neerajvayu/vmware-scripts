@@ -1,0 +1,37 @@
+$HPDetails = @() #creating an array which will store multiple items
+Foreach ($VMHost in Get-VMHost) #check each host returned by get-vmhost
+{
+   $HostProfile = $VMHost | Get-VMHostProfile #it will generate a list of hostprofile on the host
+   if ($VMHost | Get-VMHostProfile) #trigger the condition statement if host has hostprofile
+  {
+      $HP = $VMHost | Test-VMHostProfileCompliance #testing hostprofile issues
+      If ($HP.ExtensionData.ComplianceStatus -eq "nonCompliant")
+     { #if compliance status found it will list them as below
+         Foreach ($issue in ($HP.IncomplianceElementList)) {
+            $Details = "" | Select VMHost, Compliance, HostProfile, IncomplianceDescription
+            $Details.VMHost = $VMHost.Name.ToString() + "|"
+            $Details.Compliance = $HP.ExtensionData.ComplianceStatus.ToString() + "|"
+            $Details.HostProfile = $HP.VMHostProfile.ToString() + "|"
+            $Details.IncomplianceDescription = $Issue.Description
+           
+            $HPDetails += $Details
+         }
+      } Else {
+         $Details = "" | Select VMHost, Compliance, HostProfile, IncomplianceDescription
+         $Details.VMHost = $VMHost.Name
+         $Details.Compliance = "Compliant"
+         $Details.HostProfile = $HostProfile.Name
+         $Details.IncomplianceDescription = ""
+         $HPDetails += $Details
+      }
+   } Else {
+      $Details = "" | Select VMHost, Compliance, HostProfile, IncomplianceDescription
+      $Details.VMHost = $VMHost.Name
+      $Details.Compliance = "No profile attached"
+      $Details.HostProfile = ""
+      $Details.IncomplianceDescription = ""
+      $HPDetails += $Details
+   }
+}
+#when activity completed the result will be stored on $HPDetails variable and finally written to a .csv file
+$HPDetails | FT -AutoSize  > C:\tech-jockey\ComplianceHostProf.csv
