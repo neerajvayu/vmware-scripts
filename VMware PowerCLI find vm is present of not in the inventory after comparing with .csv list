@@ -1,0 +1,30 @@
+##############################################################################
+#create a file named file.csv and format it as below
+#
+#Name
+#vm1
+#vm2
+#vm3
+#
+#
+##############################################################################
+$dd=Import-Csv c:\me\file.csv
+foreach($vl in $dd)
+{
+$vv=""
+   
+            $vv=get-vm -name $vl.name -ErrorAction SilentlyContinue
+         
+            if($vv.name -eq $vl.name)
+                {
+                write-host "found :" $vl.name
+                }
+                else
+                {
+                write-host "VM Not Found :" $vl.name
+                }
+                $vv=""
+   
+ 
+}
+
