@@ -1,0 +1,19 @@
+To simplify operational management of large-scale environments, you can apply standard configurations called host profiles to hosts on vCenter Server. If you want to set up a host to use the same host profile as a reference host, you can attach the host to a profile.
+Prerequisites
+Verify that you are connected to a host that runs vCenter Server 4.0 or later.
+Procedure
+ 
+1
+Get the Host2 host.
+$vmhost2 = Get-VMHost Host2
+2
+Attach the Host2 host to the HostProfile1 host profile.
+Set-VMHost -VMHost $vmhost2 -Profile HostProfile1
+3
+Verify that the Host2 host is compliant with the HostProfile1 profile.
+Test-VMHostProfileCompliance -VMHost $vmhost2
+The output of this command contains the incompliant settings of the host, if any.
+4
+Apply the profile to the Host2 host.
+$neededVariables = Apply-VMHostProfile -Entity $vmhost2 -Profile $hp1 -Confirm:$false
+The $neededVariables variable contains the names of all required variables and their default or current values, as returned by the server. Otherwise, the $neededVariables variable contains the name of the host on which the profile has been applied.
