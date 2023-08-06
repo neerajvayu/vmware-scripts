@@ -1,0 +1,21 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+clear
+$fl=get-folder jockeyfolder1,jockeyfolder2,backupfolder1,prodfolder1
+
+foreach($fol in $fl)
+{
+write-host "Folder name " $fol
+$vm=get-folder -name $fol.name |Get-VM | Where-Object{$_.PowerState -eq "PoweredOn"} |select name
+foreach($_ in $vm)
+{
+write-host $_.name
+Shutdown-VMGuest -VM $_.name -Confirm:$false
+}
+}
+
