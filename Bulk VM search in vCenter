@@ -1,0 +1,31 @@
+Usecase:-
+In a situation when you are handeling large virtualized environment and you have for example 5000 of vms running.
+Your manager gives you list of 600 vms and asking you to verify whether they are running or not.
+If you decided to do it manually in vCenter then you are wasting time.
+Use below script to get this thing done in one shot
+1. Create a csv file and put the vm names there like below
+_______________
+Name
+vm1
+vm2
+vm3
+vm4
+_______________
+2. save it as file.csv or anyname which you want
+3. Use below script which will check and show whether vm found or not found after doing comparison from your sheet.
+$dd=Import-Csv c:\neeraj\file.csv #importing your file.csv file to get list of vms
+foreach($vl in $dd)
+{
+$vv=""
+$vv=get-vm -name $vl.name -ErrorAction SilentlyContinue #for any other error it will ignore
+if($vv.name -eq $vl.name)
+{
+write-host "found :" $vl.name
+}
+else
+{
+write-host "VM Not Found :" $vl.name
+}
+$vv=""
+
+#at the end you will see which vm is found which is not found
