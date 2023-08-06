@@ -1,0 +1,16 @@
+$hstn=Get-VMHost tech-jockey-host* |select name
+
+clear
+foreach($hsst in $hstn)
+{
+$vvv=Get-VMHost -name $hsst.name  | Get-ScsiLun |select CanonicalName,MultipathPolicy
+foreach($vm in $vvv)
+{
+
+if($vm.MultipathPolicy -eq "MostRecentlyUsed")
+{
+write-host $vm.CanonicalName," | "$vm.MultipathPolicy
+Get-VMHost -name $hsst.name  | Get-ScsiLun -CanonicalName  $vm.CanonicalName | Set-ScsiLun -MultipathPolicy RoundRobin
+}
+}
+}
