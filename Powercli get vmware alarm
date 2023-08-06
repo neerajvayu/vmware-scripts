@@ -1,0 +1,72 @@
+#get alarm info of multiple host server
+Get-AlarmDefinition -Server Server1, Server2
+
+#to get all the server alarm of a vcenter use  below script.
+$alrm=get-vmhost
+foreach($host in $alrm)
+{
+Get-AlarmDefinition -Server $host.name
+}
+
+#to get information of specific alarm, it will Extract all PowerCLI supported alarm actions for the default alarm "Host processor status".
+
+Get-AlarmDefinition -Name "Host processor status" | Get-AlarmAction -ActionType "ExecuteScript", "SendSNMP", "SendEmail"
+
+#Extract the alarm actions for the default alarm "Host processor status" by specifying the alarm by name.
+
+Get-AlarmAction -AlarmDefinition "Host processor status" -ActionType "SendSNMP" -Server 'server IP'
+
+
+#Get-AlarmDefinition is a typical PowerCLI getter.
+#It returns all the alarms defined on the vCenter Servers you’re connected to.
+Get-AlarmDefinition # This will return all the defined alarms on the servers you’re connected to
+
+#This will return all the disabled alarm definitions with names starting with “virtual machine”
+Get-AlarmDefinition -Name "virtual machine*" -Enabled $false
+
+#This will return all alarms that apply to the host “hostname”.
+#This includes alarms defined on this host and alarms inherited from the parent entity, or from any ancestors in the inventory hierarchy.
+Get-VMHost hostname | Get-AlarmDefinition
+
+#Here’s how you can modify an alarm definition:
+
+#This will rename the alarm to “Host memory” and disable it
+Get-AlarmDefinition "Host memory status" | Set-AlarmDefinition -Name "Host memory" -Enabled $false
+
+#The main part of the alarm definitions you can manage is an alarm’s actions configuration.
+#You can create an alarm action this way:
+#This will create a send email action which will be triggered once when the alarm state changes from warning (yellow) to alert (red)
+Get-AlarmDefinition "Host storage status" | New-AlarmAction -Email -To “me@mycompany.com” -Subject "Host storage shortage"
+
+H#ere is how you can add another action trigger, which will fire earlier – when the alarm state changes from normal (green) to alert (yellow):
+#Get the action we previously created
+$action = Get-AlarmDefinition "Host storage status" | Get-AlarmAction -ActionType SendEmail
+
+#Add a new repeating trigger to the action
+$action | New-AlarmActionTrigger -StartStatus Green -EndStatus Yellow –Repeat
+
+#You can also set the interval at which the action is repeated:
+#This will configure the send email action to repeat once a day (as long as the alarm is in the yellow state)
+Set-AlarmDefinition "Host storage status" -ActionRepeatMinutes (60 * 24)
+
+#Finally you may want to remove certain alarm actions. You can do it this way:
+$action = Get-AlarmDefinition "Host storage status" | Get-AlarmAction -ActionType SendEmail
+Remove-AlarmAction -AlarmAction $action
+
+#This is what you can do with the newly introduced cmdlets.
+#The PowerCLI team has decided that the rest of the alarm functionality will not be reconfigured often enough to add cmdlets for the task.
+#However you can always gain full control over the situation through the alarm’s View object.
+#Here’s how you can change alarm configuration that is not available to change through the cmdlets:
+#Get the alarm’s view
+$alarmDefinition = Get-AlarmDefinition "Host storage status"
+
+$alarmSpecification = $alarmDefinition. ExtensionData
+
+#Make the desired alarm configuration changes
+$alarmSpecification. Description="advanced-set description…..”
+
+#Update the alarm
+
+$alarmView = Get-View $alarmSpecification.Alarm
+
+$alarmView.ReconfigureAlarm( $alarmSpecification )
