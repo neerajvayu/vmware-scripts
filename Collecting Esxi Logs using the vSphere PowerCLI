@@ -1,0 +1,41 @@
+Connecting to vCenter Server or an ESX/ESXi host with PowerCLI
+To run specific vSphere PowerCLI cmdlets and perform administration or monitoring tasks, you must connect to vCenter Server or an ESX/ESXi host.
+ 
+Launch the vSphere PowerCLI.
+In the vSphere PowerCLI console window, establish a connection to an ESX/ESXi host or a vCenter Server using the command:
+
+Connect-VIServer -Server HostnameOrIPAddress
+
+You see output similar to:
+
+Name                    Port     User
+----                    ----     ----
+HostnameOrIPAddress     443      Username
+
+Note: If the certificate is not trusted, a warnings displays. Depending on your security policy, these warnings can be ignored.
+Downloading a diagnostic log bundle from vCenter Server
+To download a vc-support diagnostic log bundle from vCenter Server:
+Enter the command:
+
+Get-Log -Bundle -DestinationPath c:\Storage\Location\
+
+You see output similar to:
+
+Data
+----
+C:\Storage\Location\vc-support-nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.tgz
+
+No progress bar is provided for the command. When completed, upload the logs to the FTP site.
+Download a diagnostic log bundle from an ESX/ESXi host
+To download a vm-support diagnostic log bundle from an ESX/ESXi host managed by vCenter Server:
+Enter the command:
+
+Get-VMHost HostNameOrIP | Get-Log -Bundle -DestinationPath c:\Storage\Location\
+
+You see output similar to:
+
+Data
+----
+C:\Storage\Location\vm-support-nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.tgz
+
+No progress bar is provided for the command. When completed, upload the logs to the FTP Site
