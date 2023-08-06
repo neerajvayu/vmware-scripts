@@ -1,0 +1,7 @@
+Procedure
+1
+View all hosts on the vCenter Server system that you have established a connection with.
+Get-VMHost
+2
+Add the Host standalone host.
+Add-VMHost -Name Host -Location (Get-Datacenter DC) -User root -Password pass
