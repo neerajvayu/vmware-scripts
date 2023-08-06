@@ -1,0 +1,24 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+clear
+#To get information of network adapter of a vm
+
+Get-VM -Name classroom | Get-NetworkAdapter
+
+#To get all the VLAN port groups of a Host including all vsitch
+Get-VirtualSwitch -VMHost tech-jockeyhost1 |Get-VirtualPortGroup
+
+Foreach ($Host in (get-vmhost))
+{
+ $testvs =  New-VirtualSwitch -VMHost $Host -Name vSwitch1 -Nic vmnic3,vmnic4
+
+ New-VirtualPortGroup -VirtualSwitch $testvs  -Name VLAN04  -VLanID 04
+ New-VirtualPortGroup -VirtualSwitch $testvs  -Name VLAN05  -VLanID 05
+}
+
+
