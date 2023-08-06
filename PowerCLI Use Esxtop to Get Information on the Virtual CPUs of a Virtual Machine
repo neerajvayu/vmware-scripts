@@ -1,0 +1,28 @@
+ou can use the Get-EsxTop cmdlet to retrieve real-time data for troubleshooting performance problems.
+Prerequisites
+Verify that you are connected to a server that runs ESX 4.0, vCenter Server 5.0 or later.
+Procedure
+1
+Get the group to which the virtual machine belongs and save it as a variable.
+$group = Get-EsxTop -CounterName SchedGroup | where {$_.VMName -eq $vm.Name}
+2
+Get the IDs of all virtual CPUs of the virtual machine and store them in an array.
+$gr = Get-EsxTop -TopologyInfo -Topology SchedGroup | %{$_.Entries} | where {$_.GroupId -eq $group.GroupID}
+$cpuIds = @()
+$gr.CpuClient | %{$cpuIds += $_.CPUClientID}
+3
+Get the CPU statistics for the virtual machine.
+$cpuStats = Get-EsxTop -CounterName VCPU | where {$cpuIds -contains $_.VCPUID}
+4
+Calculate the used and ready for use percentage by using the UsedTimeInUsec and ReadyTimeInUsec stats.
+$result = @()
+$cpuStats | %{ `
+$row = "" | select VCPUID, Used, Ready; `
+$row.VCPUID = $_.VCPUID; `
+$row.Used = [math]::Round(([double]$_.UsedTimeInUsec/[double]$_.UpTimeInUsec)*100, 2); `
+$row.Ready = [math]::Round(([double]$_.ReadyTimeInUsec/[double]$_.UpTimeInUsec)*100, 2);` 
+$result += $row
+}
+5
+View the used and ready for use percentage for each virtual CPU of the virtual machine.
+$result | Format-Table –AutoSize
