@@ -1,0 +1,79 @@
+#VM Resource Limit Report
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+clear
+   
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $True
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “VM Name”
+$Sheet.Cells.Item(1,2) = “No Of Cpu”
+$Sheet.Cells.Item(1,3) = “Cpu Limit”
+$Sheet.Cells.Item(1,4) = “CPU Share”
+$Sheet.Cells.Item(1,5) = “Total Ram”
+$Sheet.Cells.Item(1,6) = “RAM Limit”
+$Sheet.Cells.Item(1,7) = “RAM Share”
+$Sheet.Cells.Item(1,8) = “Disk Detail”
+
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+
+$intRow = 2
+
+$vmlist = get-vm
+
+foreach ($vmm in $vmlist)
+    {
+   
+    $vmname=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty VM
+    $no_of_cpu=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty NumCpuShares
+    $cpu_limit=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty CpuLimitMhz
+            if($cpu_limit -eq -1)
+            {$cpulimit="Unlimited"}else{$cpulimit=$cpu_limit}
+    $cpu_share=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty CpuSharesLevel
+    $total_ram=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty NumMemShares
+    $ram_limit=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty MemLimitMB
+            if($ram_limit -eq -1)
+            {$ramlimit="Unlimited"}else{$ramlimit=$ram_limit}
+    $ram_share=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty MemSharesLevel
+
+    $disk=get-VMResourceConfiguration -VM $vmm| Select -ExpandProperty DiskResourceConfiguration
+    $dskdetail=":"
+    $flag=1
+        foreach($dsk in $disk)
+        {
+         if($dsk.DiskLimitIOPerSecond -eq -1)
+            {
+             $dsklimit="Unlimited"
+             }
+        else
+            {
+            $dsklimit=$dsk.DiskLimitIOPerSecond
+            }
+       
+        $dsk_share=$dsk.DiskSharesLevel
+        $dskdetail=$dskdetail+":Limit of Disk-"+$flag.ToString()+":"+$dsklimit.ToString()+":"
+        $flag=$flag+1
+        }
+     
+$Sheet.Cells.Item($intRow,1) = $vmname.tostring()
+$Sheet.Cells.Item($intRow,2) = $no_of_cpu.tostring()
+$Sheet.Cells.Item($intRow,3) = $cpulimit.tostring()
+$Sheet.Cells.Item($intRow,4) = $cpu_share.tostring()
+$Sheet.Cells.Item($intRow,5) = $total_ram.tostring()
+$Sheet.Cells.Item($intRow,6) = $ramlimit.tostring()
+$Sheet.Cells.Item($intRow,7) = $ram_share.tostring()
+$Sheet.Cells.Item($intRow,8) = $dskdetail.tostring()
+
+ $intRow = $intRow + 1
+
+    }
+
+$WorkBook.EntireColumn.AutoFit()
