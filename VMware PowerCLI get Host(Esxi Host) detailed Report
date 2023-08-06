@@ -1,0 +1,94 @@
+#Host Report   , make sure MS Excel is installed
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $False
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “Status”
+$Sheet.Cells.Item(1,2) = “Connection”
+$Sheet.Cells.Item(1,3) = “CPU Speed (Mhz)”
+$Sheet.Cells.Item(1,4) = “Used CPU (Mhz)”
+$Sheet.Cells.Item(1,5) = “Storage Partition”
+$Sheet.Cells.Item(1,6) = “Hyper Threading”
+$Sheet.Cells.Item(1,7) = “Vendor”
+$Sheet.Cells.Item(1,8) = “Total RAM”
+$Sheet.Cells.Item(1,9) = “Server Model”
+$Sheet.Cells.Item(1,10) = “Name”
+$Sheet.Cells.Item(1,11) = “DNS Name”
+$Sheet.Cells.Item(1,12) = “No of Logical CPU”
+$Sheet.Cells.Item(1,13) = “Cluster”
+$Sheet.Cells.Item(1,14) = “CPU Type”
+$Sheet.Cells.Item(1,15) = “Time Zone”
+$Sheet.Cells.Item(1,16) = “ESXi Vesrion”
+
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+
+$intRow = 2
+
+$colItems=Get-VMHost
+foreach ($objItem in $colItems)
+{
+$PowerState1 =$objItem.PowerState.ToString()
+$ConnectionState1= $objItem.ConnectionState.ToString()
+$CpuTotalMhz1= $objItem.CpuTotalMhz
+$CpuUsageMhz1= $objItem.CpuUsageMhz
+$DiagnosticPartition1= $objItem.DiagnosticPartition.ToString()
+$HyperthreadingActive1= $objItem.HyperthreadingActive
+$Manufacturer1= $objItem.Manufacturer
+$MemoryTotalMB1= $objItem.MemoryTotalMB
+$Model1= $objItem.Model
+$Name1= $objItem.Name.ToString()
+$NetworkInfo1= $objItem.NetworkInfo.ToString()
+$NumCpu1= $objItem.NumCpu.ToString()
+$Parent1= $objItem.Parent.ToString()
+$ProcessorType1= $objItem.ProcessorType.ToString()
+$TimeZone1= $objItem.TimeZone.ToString()
+$Version1= $objItem.Version.ToString()
+$Sheet.Cells.Item($intRow,1) = $PowerState1
+$Sheet.Cells.Item($intRow,2) = $ConnectionState1
+$Sheet.Cells.Item($intRow,3) = $CpuTotalMhz1
+$Sheet.Cells.Item($intRow,4) = $CpuUsageMhz1
+$Sheet.Cells.Item($intRow,5) = $DiagnosticPartition1
+$Sheet.Cells.Item($intRow,6) = $HyperthreadingActive1
+$Sheet.Cells.Item($intRow,7) = $Manufacturer1
+$Sheet.Cells.Item($intRow,8) = $MemoryTotalMB1
+$Sheet.Cells.Item($intRow,9) = $Model1
+$Sheet.Cells.Item($intRow,10) = $Name1
+$Sheet.Cells.Item($intRow,11) = $NetworkInfo1
+$Sheet.Cells.Item($intRow,12) = $NumCpu1
+$Sheet.Cells.Item($intRow,13) = $Parent1
+$Sheet.Cells.Item($intRow,14) = $ProcessorType1
+$Sheet.Cells.Item($intRow,15) = $TimeZone1
+$Sheet.Cells.Item($intRow,16) = $Version1
+
+$intRow = $intRow + 1
+
+}
+
+$WorkBook.EntireColumn.AutoFit()
+
+$dt=get-date
+
+$day=$dt.Day.ToString()
+$hour=$dt.Hour.ToString()
+$min=$dt.Minute.ToString()
+$month=$dt.Month.ToString()
+$sec=$dt.Second.ToString()
+$yr=$dt.Year.ToString()
+$filename="Host_Report_"+$day+"_"+$month+"_"+$yr+"_"+$hour+"_"+$min+"_"+$sec
+
+$filepath="C:\jockey\"+$filename+".xlsx"
+
+echo $filepath
+echo "1"
+
+$Excel.SaveAs($filepath)
+$excel.Close()
