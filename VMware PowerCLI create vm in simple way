@@ -1,0 +1,23 @@
+#vm name is supposed to be here
+$vmname="tech-jockey-vm1","tech-jockey-vm2","tech-jockey-vm3"
+
+#Template name is supposed to be here
+$TL="RHEL7"
+$TW="Windows_Srv_2012"
+clear
+#Host name is supposed to be here                                          
+$host01="tech-jockey-host01"
+$host02="tech-jockey-host02"
+
+foreach($vm in $vmname)
+{
+
+write-host "Creating VM..."
+echo $vm
+
+new-vm -Name $vm -Template $TL -VMHost ( Get-VMHost -Name $host01 ) -Location ( Get-Folder -name New_VM) -Datastore tech-jockey-lun01
+
+#Start-Sleep -s 60
+write-host "Created VM..."
+echo $vm
+}
