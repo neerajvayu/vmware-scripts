@@ -1,0 +1,12 @@
+You can use the Get-View cmdlet to filter vSphere objects before performing various actions on them.
+The filter parameter is a HashTable object containing one or more pairs of filter criteria. Each of the criteria consists of a property path and a value that represents a regular expression pattern used to match the property.
+Prerequisites
+Verify that you are connected to a vCenter Server system.
+Procedure
+1
+Create a filter by the power state and the guest operating system name of the virtual machines.
+$filter = @{"Runtime.PowerState" ="poweredOn"; "Config.GuestFullName" = "Windows XP"}
+2
+Get a list of the virtual machines by using the created filter and call the ShutdownGuest method for each virtual machine in the list.
+Get-View -ViewType "VirtualMachine" -Filter $filter | foreach{$_.ShutdownGuest()}
+The filter gets a list of the powered-on virtual machines whose guest OS names contain the string Windows XP. The Get-View cmdlet then initiates shutdown for each guest operating system in the list.
