@@ -1,0 +1,9 @@
+$vmm=Get-VMHost jockey-host01 | Get-VM | Where-Object {$_.PowerState -eq "PoweredOn"} |select name
+
+
+foreach($nvm in $vmm)
+{
+
+Move-Vm -VM $nvm.name -Destination(Get-Folder -Name PowerON-VMS)
+
+}
