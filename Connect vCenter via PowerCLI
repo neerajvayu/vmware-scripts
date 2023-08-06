@@ -1,0 +1,45 @@
+#How to connect to VMware vCenter Through PowerCLI 
+ 
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+#above line is mandatory to add so that it can import all the function of VMware automation module 
+ 
+#first you need to create login so that every time you do not need to put your username and password 
+ 
+write-host "1.Create Login `n2. Connect vCenter China `n3. Connect vCenter Japan `n4. Connect Both vCenter`n"
+$ch=read-host "Enter your choice [1,2,3,4] :"
+#$ch is a variable which will store your choice
+
+#This loop will run only if you wanted to created login
+#Before doing this make sure to create a folder named "vccred" in your system drive 
+ 
+if($ch -eq 1)
+{
+$Admin = Read-Host "Enter username to connect to vCenter [domianusername]"
+$sysdrv=$env:SystemDrive #$sysdrv refering to system drive "c:" most of the cases
+  $SecureString = Read-Host -AsSecureString 'Enter password'
+  ConvertFrom-SecureString $SecureString > $sysdrv/vccred/login.txt
+  echo "Credential created in the system drive"
+}
+
+######## Once you created the login below code will be used to get the credential and login to vCenter
+$Admin = "vayu.cominsane" #here vayu.com is teh domain name and insane is the username
+$Password = Get-Content C:vccredlogin.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+########
+
+if($ch -eq 2)
+{
+Connect-VIServer 192.168.1.100 -SaveCredentials -Credential $Credential
+}
+
+if($ch -eq 3)
+{
+Connect-VIServer 192.168.2.100 -SaveCredentials -Credential $Credential
+}
+
+if($ch -eq 4)
+{
+Connect-VIServer 192.168.1.100 -SaveCredentials -Credential $Credential
+Connect-VIServer 192.168.2.100 -SaveCredentials -Credential $Credential
+} 
