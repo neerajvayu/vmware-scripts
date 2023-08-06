@@ -1,0 +1,10 @@
+clear
+$folderid=get-folder | get-vm |select name
+
+foreach($vmn in $folderid)
+{
+
+$dis=$vmn.name.ToString()+"_expired_by_script"
+ Set-VM -VM $vmn.name -Name $dis -Confirm:$false
+
+}
