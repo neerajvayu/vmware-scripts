@@ -1,0 +1,29 @@
+By using vSphere PowerCLI cmdlets, you can automate creating different inventory objects on vSphere.
+Prerequisites
+Verify that you are connected to a vCenter Server system.
+Procedure
+1
+Get the inventory root folder and create a new folder named Folder in it.
+$folder = Get-Folder -NoRecursion | New-Folder -Name Folder
+2
+Create a new datacenter named DC in the Folder folder.
+New-Datacenter -Location $folder -Name DC
+3
+Create a folder named Folder1 under DC.
+Get-Datacenter DC | New-Folder -Name Folder1
+$folder1 = Get-Folder -Name Folder1
+4
+Create a new cluster Cluster1 in the Folder1 folder.
+New-Cluster -Location $folder1 -Name Cluster1 -DrsEnabled -DrsAutomationLevel FullyAutomated
+Distributed Resource Scheduler (DRS) is a feature that provides automatic allocation of cluster resources.
+5
+Add a host in the cluster by using the Add-VMHost command, and provide credentials when prompted.
+$vmhost1 = Add-VMHost -Name 10.23.112.345 -Location (Get-Cluster Cluster1)
+6
+Create a resource pool in the root resource pool of the cluster.
+$myClusterRootRP = Get-Cluster Cluster1 | Get-ResourcePool -Name Resources
+New-ResourcePool -Location $myClusterRootRP -Name MyRP1 -CpuExpandableReservation $true -CpuReservationMhz 500 -CpuSharesLevel high -MemExpandableReservation $true -MemReservationGB 1 -MemSharesLevel high
+7
+Create a virtual machine asynchronously.
+$vmCreationTask = New-VM -Name VM2 -VMHost $vmhost1 -ResourcePool MyRP01 -DiskGB 100 -MemoryGB 2 -RunAsync
+The RunAsync parameter indicates that the command runs asynchronously. This means that in contrast to a synchronous operation, you do not have to wait for the process to complete before supplying the next command at the command line.
