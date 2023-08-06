@@ -1,0 +1,10 @@
+clear
+$folderid=get-vm -name tech-jockey-vm1,tech-jockey-vm2,tech-jockey-vm3 |select name
+
+foreach($vmn in $folderid)
+{
+$folderparent=get-view $vmn
+$p=get-view $folderparent.Parent
+$pp=get-view $p.Parent |select name
+write-host "VMname :" $vmn.Name.ToString() ":" "Child Folder :"  $p.Name  ":" "Parent Folder :" $pp.Name
+}
