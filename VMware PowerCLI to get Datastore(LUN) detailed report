@@ -1,0 +1,59 @@
+# Please note that you will need the VMware powershell plugins and a installed MS Excel on the machine running the code.
+clear
+
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $True
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “Name”
+$Sheet.Cells.Item(1,2) = “Connected”
+$Sheet.Cells.Item(1,3) = “Total Space [GB]”
+$Sheet.Cells.Item(1,4) = “Total Space [MB]”
+$Sheet.Cells.Item(1,5) = “Free Space [GB]”
+$Sheet.Cells.Item(1,6) = “Free Space [MB]”
+$Sheet.Cells.Item(1,7) = “Used Space [MB]”
+$Sheet.Cells.Item(1,8) = “Storage Path”
+$Sheet.Cells.Item(1,9) = “Congestion [Millisec]”
+$Sheet.Cells.Item(1,10) = “IOControlEnabled”
+$Sheet.Cells.Item(1,11) = “Filesystem Type”
+
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+$intRow = 2
+
+$colItems=Get-Datastore
+foreach ($objItem in $colItems)
+{
+$Sheet.Cells.Item($intRow,1) = $objItem.Name
+$Name1= $objItem.Name.ToString()
+$Accessible1 = $objItem.Accessible.ToString()
+$CapacityGB1= $objItem.CapacityGB.ToString()
+$CapacityMB1 = $objItem.CapacityMB.ToString()
+$FreeSpaceGB1= $objItem.FreeSpaceGB.ToString()
+$FreeSpaceMB1 = $objItem.FreeSpaceMB.ToString()
+$DatastoreBrowserPath1= $objItem.DatastoreBrowserPath.ToString()
+$CongestionThresholdMillisecond1 = $objItem.CongestionThresholdMillisecond.ToString()
+$StorageIOControlEnabled1= $objItem.StorageIOControlEnabled.ToString()
+$Type1 = $objItem.Type.ToString()
+$freemb=$objItem.FreeSpaceMB
+$allmb=$objItem.CapacityMB
+$used1= $allmb - $freemb
+
+$Sheet.Cells.Item($intRow,1) = $Name1
+$Sheet.Cells.Item($intRow,2) = $Accessible1
+$Sheet.Cells.Item($intRow,3) = $CapacityGB1
+$Sheet.Cells.Item($intRow,4) = $CapacityMB1
+$Sheet.Cells.Item($intRow,5) = $FreeSpaceGB1
+$Sheet.Cells.Item($intRow,6) = $FreeSpaceMB1
+$Sheet.Cells.Item($intRow,7) = $used1
+$Sheet.Cells.Item($intRow,8) = $DatastoreBrowserPath1
+$Sheet.Cells.Item($intRow,9) = $CongestionThresholdMillisecond1
+$Sheet.Cells.Item($intRow,10) = $StorageIOControlEnabled1
+$Sheet.Cells.Item($intRow,11) = $Type1
+
+$intRow = $intRow + 1
+
+}
+
+$WorkBook.EntireColumn.AutoFit()
