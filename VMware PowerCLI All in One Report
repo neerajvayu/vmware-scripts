@@ -1,0 +1,308 @@
+write-host "Name -- VMware capacity details script V.1.0.0"
+Write-Host "=============================================="
+Write-Host""
+echo "Loading VMWARE dll..."
+for($i=1;$i -le 100;$i++)
+{
+Start-Sleep -m 50
+Write-Host -NoNewline "."
+}
+Write-Host""
+Write-Host""
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin = Read-Host "Enter user name to connect to VC [domian\username]"
+$sysdrv=$env:SystemDrive
+if(!(Test-Path -Path $sysdrv\vccred))
+{
+echo "Crecential folder vccred from system drive has been deleted by someone"
+echo "Creating New credential folder"
+md $sysdrv\vccred
+$SecureString = Read-Host -AsSecureString 'Enter password'
+ConvertFrom-SecureString $SecureString > $sysdrv\vccred\securestring.txt
+echo "Credential created in the system drive"
+echo "Loading credential"
+$Password = Get-Content $sysdrv\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+write-host "1. USA vCenter `n2. Japan vCenter `n3. UK vCenter`n"
+$ch=read-host "Which vCenter you want to connect[1,2,3] :"
+if($ch -eq 1)
+{
+Connect-VIServer 111.222.71.93 -SaveCredentials -Credential $Credential
+}
+if($ch -eq 2)
+{
+Connect-VIServer 55.77.88.62 -SaveCredentials -Credential $Credential
+}
+if($ch -eq 3)
+{
+Connect-VIServer 98.67.90.43 -SaveCredentials -Credential $Credential
+}
+}
+else
+{
+echo "Loading credential"
+$Password = Get-Content $sysdrv\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+write-host "1. USA vCenter `n2. Japan vCenter `n3. UK vCenter`n"
+$ch=read-host "Which VC you want to connect[1,2,3] :"
+
+if($ch -eq 1)
+{
+Connect-VIServer 111.222.71.93 -SaveCredentials -Credential $Credential
+}
+
+if($ch -eq 2)
+{
+Connect-VIServer 55.77.88.62 -SaveCredentials -Credential $Credential
+}
+
+if($ch -eq 3)
+{
+Connect-VIServer 98.67.90.43 -SaveCredentials -Credential $Credential
+}
+
+}
+
+echo "Rendering Screen ..."
+for($i=1;$i -le 100;$i++)
+{
+Start-Sleep -m 50
+Write-Host -NoNewline "."
+}
+Write-Host""
+Write-Host""
+clear
+write-host "Name -- VMware capacity details script V.1.0.0"
+Write-Host "=============================================="
+Write-Host""
+echo "Please select the Report option from below choices"
+echo "___________________________________________________________________________________"
+echo "1. VM based report"
+echo "2. Host based report"
+echo "3. Storage based report"
+echo "4. Cluster based report"
+echo "___________________________________________________________________________________"
+echo ""
+$chh= read-host "Enter your choice [1,2,3,4] : "
+#vm based report
+if($chh -eq 1)
+{
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $True
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “VM Name”
+$Sheet.Cells.Item(1,2) = “CPU”
+$Sheet.Cells.Item(1,3) = “RAM”
+$Sheet.Cells.Item(1,4) = “Status”
+$Sheet.Cells.Item(1,5) = “Folder”
+$Sheet.Cells.Item(1,6) = “OS”
+$Sheet.Cells.Item(1,7) = “HardDisks”
+$Sheet.Cells.Item(1,8) = “Total Space”
+$Sheet.Cells.Item(1,9) = “Used Space”
+$Sheet.Cells.Item(1,10) = “Physical Host”
+$Sheet.Cells.Item(1,11) = “|”
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+$intRow = 2
+$colItems=get-vm
+foreach ($objItem in $colItems)
+{
+$Sheet.Cells.Item($intRow,1) = $objItem.Name
+$powerstate = $objItem.PowerState
+If ($PowerState -eq 1) {$power = “Powerd On”}
+Else {$power = “Powerd Off”}
+$folder1= $objItem.Folder.ToString()
+$Guest1 = $objItem.Guest.ToString()
+$HardDisks1 = $objItem.HardDisks.Filename
+$allhdd=""
+$sep=""
+foreach($_ in $HardDisks1)
+{
+$allhdd=$allhdd.ToString() +$sep.ToString()+$_.ToString()
+$sep=","
+}
+$ProvisionedSpaceGB1 = $objItem.ProvisionedSpaceGB.ToString()
+$UsedSpaceGB1 = $objItem.UsedSpaceGB.ToString()
+$VMHost1 = $objItem.VMHost.Name.ToString()
+$Sheet.Cells.Item($intRow,2) = $objItem.NumCPU
+$Sheet.Cells.Item($intRow,3) = $objItem.MemoryMB
+$Sheet.Cells.Item($intRow,4) = $power
+$Sheet.Cells.Item($intRow,5) = $folder1
+$Sheet.Cells.Item($intRow,6) = $Guest1
+$Sheet.Cells.Item($intRow,7) = $allhdd
+$Sheet.Cells.Item($intRow,8) = $ProvisionedSpaceGB1
+$Sheet.Cells.Item($intRow,9) = $UsedSpaceGB1
+$Sheet.Cells.Item($intRow,10) = $VMHost1
+
+$intRow = $intRow + 1
+}
+$WorkBook.EntireColumn.AutoFit()
+}
+
+#host based report
+if($chh -eq 2)
+{
+
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $True
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “Status”
+$Sheet.Cells.Item(1,2) = “Connection”
+$Sheet.Cells.Item(1,3) = “CPU Speed (Mhz)”
+$Sheet.Cells.Item(1,4) = “Used CPU (Mhz)”
+$Sheet.Cells.Item(1,5) = “Storage Partition”
+$Sheet.Cells.Item(1,6) = “Hyper Threading”
+$Sheet.Cells.Item(1,7) = “Vendor”
+$Sheet.Cells.Item(1,8) = “Total RAM”
+$Sheet.Cells.Item(1,9) = “Server Model”
+$Sheet.Cells.Item(1,10) = “Name”
+$Sheet.Cells.Item(1,11) = “DNS Name”
+$Sheet.Cells.Item(1,12) = “No of Logical CPU”
+$Sheet.Cells.Item(1,13) = “Cluster”
+$Sheet.Cells.Item(1,14) = “CPU Type”
+$Sheet.Cells.Item(1,15) = “Time Zone”
+$Sheet.Cells.Item(1,16) = “ESXi Vesrion”
+
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+$intRow = 2
+$colItems=Get-VMHost
+foreach ($objItem in $colItems)
+{
+$PowerState1 =$objItem.PowerState.ToString()
+$ConnectionState1= $objItem.ConnectionState.ToString()
+$CpuTotalMhz1= $objItem.CpuTotalMhz
+$CpuUsageMhz1= $objItem.CpuUsageMhz
+$DiagnosticPartition1= $objItem.DiagnosticPartition.ToString()
+$HyperthreadingActive1= $objItem.HyperthreadingActive
+$Manufacturer1= $objItem.Manufacturer
+$MemoryTotalMB1= $objItem.MemoryTotalMB
+$Model1= $objItem.Model
+$Name1= $objItem.Name.ToString()
+$NetworkInfo1= $objItem.NetworkInfo.ToString()
+$NumCpu1= $objItem.NumCpu.ToString()
+$Parent1= $objItem.Parent.ToString()
+$ProcessorType1= $objItem.ProcessorType.ToString()
+$TimeZone1= $objItem.TimeZone.ToString()
+$Version1= $objItem.Version.ToString()
+$Sheet.Cells.Item($intRow,1) = $PowerState1
+$Sheet.Cells.Item($intRow,2) = $ConnectionState1
+$Sheet.Cells.Item($intRow,3) = $CpuTotalMhz1
+$Sheet.Cells.Item($intRow,4) = $CpuUsageMhz1
+$Sheet.Cells.Item($intRow,5) = $DiagnosticPartition1
+$Sheet.Cells.Item($intRow,6) = $HyperthreadingActive1
+$Sheet.Cells.Item($intRow,7) = $Manufacturer1
+$Sheet.Cells.Item($intRow,8) = $MemoryTotalMB1
+$Sheet.Cells.Item($intRow,9) = $Model1
+$Sheet.Cells.Item($intRow,10) = $Name1
+$Sheet.Cells.Item($intRow,11) = $NetworkInfo1
+$Sheet.Cells.Item($intRow,12) = $NumCpu1
+$Sheet.Cells.Item($intRow,13) = $Parent1
+$Sheet.Cells.Item($intRow,14) = $ProcessorType1
+$Sheet.Cells.Item($intRow,15) = $TimeZone1
+$Sheet.Cells.Item($intRow,16) = $Version1
+$intRow = $intRow + 1
+}
+$WorkBook.EntireColumn.AutoFit()
+}
+
+#storage based report
+if($chh -eq 3)
+{
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $True
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “Name”
+$Sheet.Cells.Item(1,2) = “Connected”
+$Sheet.Cells.Item(1,3) = “Total Space [GB]”
+$Sheet.Cells.Item(1,4) = “Free Space [GB]”
+$Sheet.Cells.Item(1,5) = “Storage Path”
+$Sheet.Cells.Item(1,6) = “Congestion [Millisec]”
+$Sheet.Cells.Item(1,7) = “IOControlEnabled”
+$Sheet.Cells.Item(1,8) = “Filesystem Type”
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+$intRow = 2
+$colItems=Get-Datastore
+foreach ($objItem in $colItems)
+{
+$Sheet.Cells.Item($intRow,1) = $objItem.Name
+$Name1= $objItem.Name.ToString()
+$Accessible1 = $objItem.Accessible.ToString()
+$CapacityGB1= $objItem.CapacityGB.ToString()
+$CapacityMB1 = $objItem.CapacityMB.ToString()
+$FreeSpaceGB1= $objItem.FreeSpaceGB.ToString()
+$FreeSpaceMB1 = $objItem.FreeSpaceMB.ToString()
+$DatastoreBrowserPath1= $objItem.DatastoreBrowserPath.ToString()
+$CongestionThresholdMillisecond1 = $objItem.CongestionThresholdMillisecond.ToString()
+$StorageIOControlEnabled1= $objItem.StorageIOControlEnabled.ToString()
+$Type1 = $objItem.Type.ToString()
+$freemb=$objItem.FreeSpaceMB
+$allmb=$objItem.CapacityMB
+$used1= $allmb - $freemb
+$Sheet.Cells.Item($intRow,1) = $Name1
+$Sheet.Cells.Item($intRow,2) = $Accessible1
+$Sheet.Cells.Item($intRow,3) = $CapacityGB1
+$Sheet.Cells.Item($intRow,4) = $FreeSpaceGB1
+$Sheet.Cells.Item($intRow,5) = $DatastoreBrowserPath1
+$Sheet.Cells.Item($intRow,6) = $CongestionThresholdMillisecond1
+$Sheet.Cells.Item($intRow,7) = $StorageIOControlEnabled1
+$Sheet.Cells.Item($intRow,8) = $Type1
+$intRow = $intRow + 1
+}
+
+$WorkBook.EntireColumn.AutoFit()
+}
+
+#cluster based report
+if($chh -eq 4)
+{
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $True
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “Cluster Name”
+$Sheet.Cells.Item(1,2) = “DRS Status”
+$Sheet.Cells.Item(1,3) = “Drs Automation Level”
+$Sheet.Cells.Item(1,4) = “HA Status”
+$Sheet.Cells.Item(1,5) = “HA Failover Level”
+$Sheet.Cells.Item(1,6) = “HA Restart Priority”
+$Sheet.Cells.Item(1,7) = “Swap File Location”
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+$intRow = 2
+$colItems=Get-Cluster
+foreach ($objItem in $colItems)
+{
+$Name1=$objItem.Name
+$DrsEnabled1=$objItem.DrsEnabled
+$DrsAutomationLevel1=$objItem.DrsAutomationLevel.tostring()
+$HAEnabled1=$objItem.HAEnabled
+$HAFailoverLevel1=$objItem.HAFailoverLevel
+$HARestartPriority1=$objItem.HARestartPriority.tostring()
+$VMSwapfilePolicy1=$objItem.VMSwapfilePolicy.tostring()
+$Sheet.Cells.Item($intRow,1) = $Name1
+$Sheet.Cells.Item($intRow,2) = $DrsEnabled1
+$Sheet.Cells.Item($intRow,3) = $DrsAutomationLevel1
+$Sheet.Cells.Item($intRow,4) = $HAEnabled1
+$Sheet.Cells.Item($intRow,5) = $HAFailoverLevel1
+$Sheet.Cells.Item($intRow,6) = $HARestartPriority1
+$Sheet.Cells.Item($intRow,7) = $VMSwapfilePolicy1
+$intRow = $intRow + 1
+}
+
+$WorkBook.EntireColumn.AutoFit()
+}
+echo "Removing temp variables and exiting"
+for($i=1;$i -le 50;$i++)
+{
+Start-Sleep -m 50
+Write-Host -NoNewline "."
+}
