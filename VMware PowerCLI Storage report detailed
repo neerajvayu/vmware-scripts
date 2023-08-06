@@ -1,0 +1,73 @@
+#Storage Report
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+$Excel = New-Object -Com Excel.Application
+$Excel.visible = $False
+$Excel = $Excel.Workbooks.Add()
+$Addsheet = $Excel.sheets.Add()
+$Sheet = $Excel.WorkSheets.Item(1)
+$Sheet.Cells.Item(1,1) = “Name”
+$Sheet.Cells.Item(1,2) = “Connected”
+$Sheet.Cells.Item(1,3) = “Total Space [GB]”
+$Sheet.Cells.Item(1,4) = “Free Space [GB]”
+$Sheet.Cells.Item(1,5) = “Storage Path”
+$Sheet.Cells.Item(1,6) = “Congestion [Millisec]”
+$Sheet.Cells.Item(1,7) = “IOControlEnabled”
+$Sheet.Cells.Item(1,8) = “Filesystem Type”
+
+$WorkBook = $Sheet.UsedRange
+$WorkBook.Font.Bold = $True
+
+$intRow = 2
+
+$colItems=Get-Datastore
+foreach ($objItem in $colItems)
+{
+$Sheet.Cells.Item($intRow,1) = $objItem.Name
+$Name1= $objItem.Name.ToString()
+$Accessible1 = $objItem.Accessible.ToString()
+$CapacityGB1= $objItem.CapacityGB.ToString()
+$CapacityMB1 = $objItem.CapacityMB.ToString()
+$FreeSpaceGB1= $objItem.FreeSpaceGB.ToString()
+$FreeSpaceMB1 = $objItem.FreeSpaceMB.ToString()
+$DatastoreBrowserPath1= $objItem.DatastoreBrowserPath.ToString()
+$CongestionThresholdMillisecond1 = $objItem.CongestionThresholdMillisecond.ToString()
+$StorageIOControlEnabled1= $objItem.StorageIOControlEnabled.ToString()
+$Type1 = $objItem.Type.ToString()
+$freemb=$objItem.FreeSpaceMB
+$allmb=$objItem.CapacityMB
+$used1= $allmb - $freemb
+$Sheet.Cells.Item($intRow,1) = $Name1
+$Sheet.Cells.Item($intRow,2) = $Accessible1
+$Sheet.Cells.Item($intRow,3) = $CapacityGB1
+$Sheet.Cells.Item($intRow,4) = $FreeSpaceGB1
+$Sheet.Cells.Item($intRow,5) = $DatastoreBrowserPath1
+$Sheet.Cells.Item($intRow,6) = $CongestionThresholdMillisecond1
+$Sheet.Cells.Item($intRow,7) = $StorageIOControlEnabled1
+$Sheet.Cells.Item($intRow,8) = $Type1
+$intRow = $intRow + 1
+
+}
+
+$WorkBook.EntireColumn.AutoFit()
+$dt=get-date
+$day=$dt.Day.ToString()
+$hour=$dt.Hour.ToString()
+$min=$dt.Minute.ToString()
+$month=$dt.Month.ToString()
+$sec=$dt.Second.ToString()
+$yr=$dt.Year.ToString()
+$filename="Storage_Report_"+$day+"_"+$month+"_"+$yr+"_"+$hour+"_"+$min+"_"+$sec
+
+$filepath="C:\jockey\"+$filename+".xlsx"
+
+echo $filepath
+echo "1"
+
+$Excel.SaveAs($filepath)
+$excel.Close()
