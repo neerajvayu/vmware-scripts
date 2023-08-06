@@ -1,0 +1,16 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+clear
+$ErrorActionPreference = "SilentlyContinue"
+$vmm=get-vm
+
+foreach($vm in $vmm)
+{
+$vv=get-vm -name $vm.name | select @{N="IPAddress";E={@($_.guest.IPAddress[0])}}
+write-host $vm.Name.ToString(),":",$vm.VMHost.Name.ToString(),":",$vm.Guest.OSFullName.ToString(),":",$vv.IPAddress,":",$vm.Guest.State.ToString(),":",$vm.NumCpu.ToString()
+}
