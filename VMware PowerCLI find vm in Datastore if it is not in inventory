@@ -1,0 +1,11 @@
+#Useful to find vm if its disconnected somehow and don't know where vm is present
+$dstore=Get-Datastore
+clear
+foreach($dss in $dstore)
+{
+write-host $dss.Name
+
+
+Get-ChildItem  -Path vmstore:\"UK Datacenter"\$dss |Select-String -Pattern "tech-jockey-vm1"
+
+}
