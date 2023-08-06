@@ -1,0 +1,27 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\admin"
+$Password = Get-Content c:\vccred\credential\cred.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+
+$vc="vc1-name","vc2-name","vc3-name","vc4-name" # if you have 100 vc put those names here
+
+foreach($item in $vc)
+{
+Connect-VIServer $item -SaveCredentials -Credential $Credential
+}
+clear
+$inpt= Read-Host "Enter vm name to search:"
+$vmm=get-vm $inpt.ToString()
+$ht= Get-VMHost -name $vmm.Host
+$silo= Get-Cluster -name $ht.parent
+$srvid=$silo.Client.ServerUri
+$len= $srvid.length -4
+echo "VM Name"
+echo $vmm.name
+echo "======================"
+echo "Esxi Host Name"
+echo $vmm.host.Name
+echo "======================"
+echo "vCenter Name"
+echo $srvid.Substring(4,$len)
