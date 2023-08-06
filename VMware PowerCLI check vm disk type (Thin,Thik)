@@ -1,0 +1,8 @@
+clear
+$dd=Get-VM |select name
+foreach($vm in $dd)
+{
+
+Get-vm $vm.Name | get-harddisk | select Parent,StorageFormat
+Write-Host "=========================================================================="
+}
