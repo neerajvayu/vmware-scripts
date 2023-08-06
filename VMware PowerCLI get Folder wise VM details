@@ -1,0 +1,14 @@
+clear
+$fol_list=get-folder
+
+foreach($_ in $fol_list)
+{
+
+    $thisfol=$_.name
+    write-host " Folder Name : " $thisfol
+    $vms=get-folder -name $thisfol |get-vm |select name
+    foreach($item in $vms)
+    {
+        write-host $item.name
+    }
+}
