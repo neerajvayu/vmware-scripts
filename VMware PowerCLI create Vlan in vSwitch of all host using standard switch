@@ -1,0 +1,21 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+
+Foreach ($vmhost in (get-vmhost))
+{
+ $vswitch3=Get-VirtualSwitch -VMHost  $vmhost.name -name vSwitch0
+ $ch=1
+ while($ch -le 254)
+ {
+ $vl="VLAN"+$ch.ToString()
+
+ New-VirtualPortGroup -VirtualSwitch $vswitch3  -Name $vl  -VLanID $ch
+ $ch=$ch+1
+ }
+
+}
