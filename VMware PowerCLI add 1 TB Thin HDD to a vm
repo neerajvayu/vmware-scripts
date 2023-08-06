@@ -1,0 +1,19 @@
+clear
+Add-PSSnapin VMware.VimAutomation.Core
+$Admin ="tech-jockey\jockey-admin"
+$Password = Get-Content c:\vccred\securestring.txt | convertto-securestring
+$Credential = new-object -typename System.Management.Automation.PSCredential -argumentlist $Admin, $Password
+Connect-VIServer tech-jockey-vCenter -SaveCredentials -Credential $Credential
+
+clear
+#Add 1.7 TB HDD to vm
+$vmm=get-folder -name vm-fol1 |get-vm
+
+foreach($vm in $vmm)
+{
+
+$ds=get-vm -name $vm| get-datastore
+
+
+New-HardDisk -vm $vm  -Datastore $ds -StorageFormat Thin -CapacityKB 1.835e+9
+}
