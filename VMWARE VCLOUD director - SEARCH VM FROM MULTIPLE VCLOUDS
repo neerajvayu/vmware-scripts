@@ -1,0 +1,33 @@
+clear
+echo "Welcome to tech_jockey VM search Tool"
+echo "====================================="
+
+$cred=get-credential
+
+clear
+echo "Welcome to tech_jockey VM search Tool"
+echo "====================================="
+
+#Putting multiple vCloud names in the array
+$Server = "https://cloud1.tech-jockey.com","https://cloud1.tech-jockey.com","https://cloud1.tech-jockey.com","cloud1.tech-jockey.com"
+
+echo "Connecting please wait..."
+#connecting all the vCloud at a time so that later on we can fire command
+    foreach($_ in $Server)
+    {
+        Connect-CIServer $_ -credential $cred
+    }
+
+$vmn=read-host "Enter VM name"
+$vmm=Get-CIVM $vmn.tostring()
+
+  write-host "Name: " $vmm.Name -ForegroundColor blue -BackgroundColor yellow
+  write-host "Org: " $vmm.Org -ForegroundColor blue -BackgroundColor yellow
+  write-host "OrgVDC: "$vmm.OrgvDC -ForegroundColor blue -BackgroundColor yellow
+  write-host "Status: "$vmm.status -ForegroundColor blue -BackgroundColor yellow
+  write-host "OS name: "$vmm.guestOSFullName -ForegroundColor blue -BackgroundColor yellow
+  Write-Host "vAPP Name: "$vmm.VApp -ForegroundColor blue -BackgroundColor yellow
+  write-host "vCD Name: "$vmm.Client.ServiceUri -ForegroundColor blue -BackgroundColor yellow
+
+echo "Thanks for using VM search tool"
+echo "Author : Neeraj Jha And Gautam Johar" 
